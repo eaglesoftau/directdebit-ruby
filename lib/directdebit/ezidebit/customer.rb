@@ -8,7 +8,6 @@ module DirectDebit
       GET_INFO_ACTION = 'https://px.ezidebit.com.au/INonPCIService/GetCustomerDetails'
       EDIT_BANK_ACCOUNT_ACTION = 'https://px.ezidebit.com.au/IPCIService/EditCustomerBankAccount'
       CREATE_SCHEDULE_ACTION = 'https://px.ezidebit.com.au/INonPCIService/CreateSchedule'
-      GET_SCHEDULED_PAYMENTS_ACTION = 'https://px.ezidebit.com.au/INonPCIService/GetScheduledPayments'
       ADD_BANK_DEBIT_ACTION = 'https://px.ezidebit.com.au/IPCIService/AddBankDebit'
 
 
@@ -48,7 +47,7 @@ module DirectDebit
         response = request_it!
         parse(response, "get_customer_details")
       end
-    	 
+
       #This method will change the status of a customer.
     	def change_customer_status(options={})
         create_request("nonpci", UPDATE_STATUS_ACTION) do |xml|
@@ -113,14 +112,14 @@ module DirectDebit
 
       def parse_add_bank_debit_response(xml)
         data   = {}
-        data[:CustomerRef] = xml.xpath("//a:CustomerRef", 
+        data[:CustomerRef] = xml.xpath("//a:CustomerRef",
           {a: 'http://schemas.datacontract.org/2004/07/Ezidebit.PaymentExchange.V3_3.DataContracts'}).text
         data
-      end    
+      end
 
       def parse_add_customer_response(xml)
         data   = {}
-        data[:CustomerRef] = xml.xpath("//a:CustomerRef", 
+        data[:CustomerRef] = xml.xpath("//a:CustomerRef",
           {a: 'http://schemas.datacontract.org/2004/07/Ezidebit.PaymentExchange.V3_3.DataContracts'}).text
         data
       end
@@ -128,12 +127,12 @@ module DirectDebit
       def parse_get_customer_details(xml)
         data   = {}
         fieldnames = ['AddressLine1', 'AddressLine2', 'AddressPostCode', 'AddressState', 'AddressSuburb', 'ContractStartDate',
-          'CustomerFirstName', 'CustomerName', 'Email', 'EziDebitCustomerID', 'MobilePhone', 'PaymentMethod', 'PaymentPeriod', 
+          'CustomerFirstName', 'CustomerName', 'Email', 'EziDebitCustomerID', 'MobilePhone', 'PaymentMethod', 'PaymentPeriod',
           'PaymentPeriodDayOfMonth', 'PaymentPeriodDayOfWeek', 'SmsExpiredCard', 'SmsFailedNotification', 'SmsPaymentReminder',
-          'StatusCode', 'StatusDescription', 'TotalPaymentsFailed', 'TotalPaymentsFailedAmount', 'TotalPaymentsSuccessful', 
+          'StatusCode', 'StatusDescription', 'TotalPaymentsFailed', 'TotalPaymentsFailedAmount', 'TotalPaymentsSuccessful',
           'TotalPaymentsSuccessfulAmount', 'YourGeneralReference', 'YourSystemReference']
         fieldnames.each do | fieldname|
-          data[fieldname] = xml.xpath("//xmlns:GetCustomerDetailsResponse/xmlns:GetCustomerDetailsResult/xmlns:Data/xmlns:#{fieldname}",  
+          data[fieldname] = xml.xpath("//xmlns:GetCustomerDetailsResponse/xmlns:GetCustomerDetailsResult/xmlns:Data/xmlns:#{fieldname}",
             {xmlns: 'https://px.ezidebit.com.au/'} ).text
         end
         data
@@ -141,11 +140,11 @@ module DirectDebit
 
       def parse_generic_status_response(xml, method_name)
         data   = {}
-        data[:Status] = xml.xpath("//ns:#{method_name}Response/ns:#{method_name}Result/ns:Data", 
+        data[:Status] = xml.xpath("//ns:#{method_name}Response/ns:#{method_name}Result/ns:Data",
           {ns: 'https://px.ezidebit.com.au/'} ).text
-        data[:Error] = xml.xpath("//ns:#{method_name}Response/ns:#{method_name}Result/ns:Error", 
+        data[:Error] = xml.xpath("//ns:#{method_name}Response/ns:#{method_name}Result/ns:Error",
           {ns: 'https://px.ezidebit.com.au/'} ).text
-        data[:ErrorMessage] = xml.xpath("//ns:#{method_name}Response/ns:#{method_name}Result/ns:ErrorMessage", 
+        data[:ErrorMessage] = xml.xpath("//ns:#{method_name}Response/ns:#{method_name}Result/ns:ErrorMessage",
           {ns: 'https://px.ezidebit.com.au/'} ).text
         data
       end

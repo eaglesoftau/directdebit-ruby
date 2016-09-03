@@ -7,6 +7,7 @@ module DirectDebit
       PAYMENT_DETAIL_ACTION = 'https://px.ezidebit.com.au/INonPCIService/GetPaymentDetail'
       GET_PAYMENTS_ACTION = 'https://px.ezidebit.com.au/INonPCIService/GetPayments'
       GET_SCHEDULED_PAYMENTS_ACTION = 'https://px.ezidebit.com.au/INonPCIService/GetScheduledPayments'
+      CLEAR_SCHEDULE_ACTION = 'https://px.ezidebit.com.au/INonPCIService/ClearSchedule'
 
       #This method is used to add a single payment to a customer's account
       def add_payment(options={})
@@ -43,9 +44,9 @@ module DirectDebit
               xml['px'].DateFrom date_from
               xml['px'].DateTo date_to
               xml['px'].DateField date_field
-              xml['px'].EziDebitCustomerID ""
-              xml['px'].YourSystemReference ""
-              xml['px'].YourSystemReference ""
+              #xml['px'].EziDebitCustomerID ""
+              #xml['px'].YourSystemReference ""
+              #xml['px'].YourSystemReference ""
           end
         end
         response = request_it!
@@ -65,6 +66,21 @@ module DirectDebit
         response = request_it!
         parse(response, "get_scheduled_payments")
       end
+
+
+      def clear_schedule(ezi_debit_customer_id, keep_manual_payments="NO")
+          create_request("nonpci", CLEAR_SCHEDULE_ACTION) do |xml|
+            xml['px'].ClearSchedule do
+              xml['px'].DigitalKey DirectDebit::Ezidebit::api_digital_key
+              xml['px'].EziDebitCustomerID ezi_debit_customer_id
+              xml['px'].KeepManualPayments keep_manual_payments
+          end
+        end
+        response = request_it!
+        parse(response, "clear_schedule")
+      end
+
+
 
       def parse(response, type, generic_tag = nil)
         if response
@@ -87,6 +103,17 @@ module DirectDebit
         data[:Error] = xml.xpath("//ns:AddPaymentResponse/ns:AddPaymentResult/ns:Error",
           {ns: 'https://px.ezidebit.com.au/'} ).text
         data[:ErrorMessage] = xml.xpath("//ns:AddPaymentResponse/ns:AddPaymentResult/ns:ErrorMessage",
+          {ns: 'https://px.ezidebit.com.au/'} ).text
+        data
+      end
+
+      def parse_clear_schedule(xml)
+        data   = {}
+         data[:Status] = xml.xpath("//ns:ClearScheduleResponse/ns:ClearScheduleResult/ns:Data",
+          {ns: 'https://px.ezidebit.com.au/'} ).text
+        data[:Error] = xml.xpath("//ns:ClearScheduleResponse/ns:ClearScheduleResult/ns:Error",
+          {ns: 'https://px.ezidebit.com.au/'} ).text
+        data[:ErrorMessage] = xml.xpath("//ns:ClearScheduleResponse/ns:ClearScheduleResult/ns:ErrorMessage",
           {ns: 'https://px.ezidebit.com.au/'} ).text
         data
       end
